@@ -17,3 +17,7 @@ Run script to output in dot file format
 GraphViz
 https://graphviz.org/documentation/
 https://graphviz.org/pdf/dot.1.pdf
+# Version
+DRAFT script not ready for production
+# Compatibility
+Latest AVD Devel or AVD v3.3.0
