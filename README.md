@@ -8,6 +8,7 @@ Inputs CSV files from
 # Note to self
 Run script to output in dot file format
 ./genTopo.py > SOURCE-p2p.dot
+This is now built as part of the script
 
 # Usage
 - PNG Output - dot -Tpng SOURCE-p2p.dot > SOURCE-p2p.png
