@@ -39,7 +39,7 @@ def buildTopo(name,file):
   f = open(topotype,"w")
   input_file = csv.DictReader(open(sourceFilename[0]))
   #Dot file header
-  f.write("graph G { \n{ \nnode [margin=0 fontcolor=blue fontsize=32 width=0.5 shape=square style=filled ]\n}\n")
+  f.write("graph G { rankdir=LR  \n{ \nnode [margin=0 ratio=auto fontcolor=blue fontsize=32 width=0.5 shape=square style=filled ]\n}\n")
 
   allnodes  =set()
   spinerank =set()
@@ -61,16 +61,16 @@ def buildTopo(name,file):
   f.write("subgraph { \n")
   f.write("{ rank=min;\n")
   for item in spinerank:
-    f.write(item+"\n")
+    f.write("\""+item+"\""+"\n")
   f.write("};\n")
   f.write("{ rank=max;\n")
   for item in leafrank:
-    f.write(item+"\n")
+    f.write("\""+item+"\""+"\n")
   f.write("};\n")
   z=allnodes.difference(leafrank)
   f.write("{ rank=same;\n")
   for item in z.difference(spinerank):
-    f.write(item+"\n")
+    f.write("\""+item+"\""+"\n")
   f.write("};\n")
   f.write("}\n")
   f.write("\n}")
