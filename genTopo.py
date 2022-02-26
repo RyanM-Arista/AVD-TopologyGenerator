@@ -13,11 +13,6 @@ import csv
 import argparse
 import os, fnmatch
 
-options = argparse.ArgumentParser(description = 'Create Topology from generated CSV file')
-#options.add_argument('--name',action='store_const', const=diagramName, default='Data Center Topology', help='Name of topology')
-args=options.parse_args()
-print(args)
-
 def find(pattern, path):
   result = []
   for root, dirs, files in os.walk(path):
@@ -26,20 +21,26 @@ def find(pattern, path):
           result.append(os.path.join(root, name))
   return result
 
-
-
-def buildTopo(name,file):
+def buildTopo(name,file,direction,labelling):
   if not os.path.exists('./documentation/diagrams/'):
     os.makedirs('./documentation/diagrams/')
   sourceFilename = file
   topotype = ('./documentation/diagrams/' + name + ".dot")
-  #print(outputFilename[0])
+  #Determine direction of diagram
+  if direction == "LR":
+    diagramdir = "rankdir=LR"
+  elif direction == "RL":
+    diagramdir = "rankdir=RL"
+  elif direction == "BT":
+    diagramdir = "rankdir=BT"
+  else:
+    diagramdir = ''
 
   #prep for ouput files
   f = open(topotype,"w")
   input_file = csv.DictReader(open(sourceFilename[0]))
   #Dot file header
-  f.write("graph G { rankdir=LR  \n{ \nnode [margin=0 ratio=auto fontcolor=blue fontsize=32 width=0.5 shape=square style=filled ]\n}\n")
+  f.write("graph G { " + diagramdir + " \n{ \nnode [margin=0 ratio=auto fontcolor=blue fontsize=32 width=0.5 shape=square style=filled ]\n}\n")
 
   allnodes  =set()
   spinerank =set()
@@ -50,8 +51,11 @@ def buildTopo(name,file):
       peerNodeName = item.get('Peer Node')
       headlabel = item.get('Node Interface')
       taillabel = item.get('Peer Interface')
-      #print ( nodeName + " -- "+ peerNodeName +" [taillabel=\"" + taillabel + "\" headlabel=\"" + headlabel +"\"]"  ) #For interface labeling
-      f.write("\""+nodeName+"\"" + " -- "+ "\""+peerNodeName+"\"" + "\n")
+      #For interface labeling
+      if (labelling == "Y" or labelling == "y"):
+        f.write("\"" + nodeName + "\"" + " -- " + "\"" + peerNodeName + "\"" + " [taillabel=\"" + taillabel + "\" headlabel=\"" + headlabel +"\"]"  )
+      elif (labelling == "N" or labelling == "n"):
+        f.write("\"" + nodeName + "\"" + " -- " + "\"" + peerNodeName + "\"" + "\n")
       if item.get('Peer Type') == "spine":
         spinerank.add(peerNodeName)
       elif item.get('Type') == "l3leaf":
@@ -75,7 +79,6 @@ def buildTopo(name,file):
   f.write("}\n")
   f.write("\n}")
   f.close()
-
 
 def buildDiagram(name,file,exportType):
   sourceType=name
@@ -105,14 +108,29 @@ def buildDiagram(name,file,exportType):
   else:
     print('Output source not defined, please choose output type')
 
-p2p = find('*-p2p-links.csv', './documentation/fabric/')
-topofile = find('*-topology.csv', './documentation/fabric/')
+options = argparse.ArgumentParser(description = 'Create Topology from generated CSV file')
+options.add_argument('--name', type=str, help='Name of file')
+options.add_argument('--filepath', type=str, nargs='?', default='./documentation/fabric/', help='If filepath is not in default directory(./documentation/fabric/)')
+options.add_argument('--outputtype', type=str, nargs='?', default='png', help='Output file type { [png] | svg | bmp | gif | jpg | json | pdf | webp }')
+options.add_argument('--direction', type=str, help='Direction of Topology Diagram, { LR (Left to Right) | RL (Right to Left) | BT (Bottom to Top) | [none] (Top to Bottom) }')
+options.add_argument('--linelabels', type=str, nargs='?', default='N',help='Add Interface Labels { Y | [ N ]')
+args=options.parse_args()
+print(args)
+
+filename = args.name
+filepath = args.filepath
+fileouput = args.outputtype
+filedirection = args.direction
+filelinelabel = args.linelabels
+
+p2p = find('*-p2p-links.csv', filepath) #'./documentation/fabric/')
+topofile = find('*-topology.csv', filepath) #'./documentation/fabric/')
 print("Building Peer To Peer Topology source file")
-buildTopo('PeerToPeer',p2p)
+buildTopo('PeerToPeer', p2p, filedirection, filelinelabel )
 print("Building Fabric Topology source file")
-buildTopo('FabricTopology',topofile)
+buildTopo('FabricTopology', topofile, filedirection, filelinelabel )
 
 p2pdiag = find('PeerToPeer.dot', './documentation/diagrams/')
-buildDiagram('PeerToPeer',p2pdiag,'png')
+buildDiagram('PeerToPeer', p2pdiag, fileouput)#'png')
 fabricdiag = find('FabricTopology.dot', './documentation/diagrams/')
-buildDiagram('FabricTopology',fabricdiag,'png')
+buildDiagram('FabricTopology', fabricdiag, fileouput)#'png')
