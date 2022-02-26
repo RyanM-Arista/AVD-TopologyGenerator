@@ -1,13 +1,10 @@
 #!/usr/bin/env python3
 #DRAFT script not ready for prod.
 #works on latest AVD devel or AVD v3.3.0
-#Works from root folder of AVD project
+#Usage: Place in root folder of AVD project and execute add --help for available options
 #Todo
 #   - host handling (adjust ranking)
-#   - work on importing both csv files
-#   - integrate output handling
 #   - UI prompts for outuput filetypes or folder location
-#   - Graphviz doens't handle single dashes in hostnames, change to underscore or something else
 
 import csv
 import argparse
@@ -108,14 +105,14 @@ def buildDiagram(name,file,exportType):
   else:
     print('Output source not defined, please choose output type')
 
-options = argparse.ArgumentParser(description = 'Create Topology from generated CSV file')
+options = argparse.ArgumentParser(description = 'Create Topology Diagram from generated CSV file')
 options.add_argument('--name', type=str, help='Name of file')
 options.add_argument('--filepath', type=str, nargs='?', default='./documentation/fabric/', help='If filepath is not in default directory(./documentation/fabric/)')
 options.add_argument('--outputtype', type=str, nargs='?', default='png', help='Output file type { [png] | svg | bmp | gif | jpg | json | pdf | webp }')
 options.add_argument('--direction', type=str, help='Direction of Topology Diagram, { LR (Left to Right) | RL (Right to Left) | BT (Bottom to Top) | [none] (Top to Bottom) }')
 options.add_argument('--linelabels', type=str, nargs='?', default='N',help='Add Interface Labels { Y | [ N ]')
 args=options.parse_args()
-print(args)
+#print(args) for debug
 
 filename = args.name
 filepath = args.filepath
