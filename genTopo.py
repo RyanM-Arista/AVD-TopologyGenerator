@@ -41,8 +41,8 @@ def buildTopo(name,file,direction,labelling):
 
   allnodes  =set()
   spinerank =set()
-  spinerank2 = []
-  leafrank  =set()
+  l2leafrank = set()
+  l3leafrank  =set()
   for item in input_file:
       nodeName = item.get('Node')
       peerNodeName = item.get('Peer Node')
@@ -56,7 +56,9 @@ def buildTopo(name,file,direction,labelling):
       if item.get('Peer Type') == "spine":
         spinerank.add(peerNodeName)
       elif item.get('Type') == "l3leaf":
-        leafrank.add(nodeName)
+        l3leafrank.add(nodeName)
+      elif item.get('Type') == "l2leaf":
+        l2leafrank.add(nodeName)
       allnodes.add(nodeName)
   f.write("\n")
   f.write("subgraph { \n")
@@ -64,12 +66,20 @@ def buildTopo(name,file,direction,labelling):
   for item in spinerank:
     f.write("\""+item+"\""+"\n")
   f.write("};\n")
-  f.write("{ rank=max;\n")
-  for item in leafrank:
+
+  f.write("{ rank=same;\n")
+  for item in l3leafrank:
     f.write("\""+item+"\""+"\n")
   f.write("};\n")
-  z=allnodes.difference(leafrank)
+  z=allnodes.difference(l3leafrank)
+
   f.write("{ rank=same;\n")
+  for item in l2leafrank:
+    f.write("\""+item+"\""+"\n")
+  f.write("};\n")
+  z=allnodes.difference(l2leafrank)
+
+  f.write("{ rank=4;\n")
   for item in z.difference(spinerank):
     f.write("\""+item+"\""+"\n")
   f.write("};\n")
